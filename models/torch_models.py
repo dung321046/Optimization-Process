@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 
 
-def buildNetwork(layers, activation="relu", dropout=0.0):
+def buildNetwork(layers, activation="relu", dropout=0.2):
     net = []
     for i in range(1, len(layers)):
         net.append(nn.Linear(layers[i - 1], layers[i]))
@@ -23,7 +23,7 @@ def buildNetwork(layers, activation="relu", dropout=0.0):
 class BinaryClassification(nn.Module):
     def __init__(self, input_size, device):
         super(BinaryClassification, self).__init__()
-        self.main_net = buildNetwork([input_size, 16, 64, 1], dropout=0.1)
+        self.main_net = buildNetwork([input_size, 64, 16, 1], dropout=0.1)
         self.criterion = nn.BCEWithLogitsLoss()
         self.device = device
 
@@ -33,7 +33,7 @@ class BinaryClassification(nn.Module):
 
     def get_last_layer(self, inputs):
         for layer in self.main_net[:-3]:
-             inputs = layer(inputs)
+            inputs = layer(inputs)
         return inputs
 
     def binary_acc(self, y_pred, y_test):
@@ -48,8 +48,8 @@ class BinaryClassification(nn.Module):
     def fit(self, train_loader, EPOCHS=20):
         # self.cuda(device)
         self.train()
-        criterion = nn.BCEWithLogitsLoss()
-        optimizer = optim.Adam(self.parameters(), lr=0.001)
+        # optimizer = optim.Adam(self.parameters(), lr=0.01)
+        optimizer = optim.SGD(self.parameters(), lr=0.1, momentum=0.9)
         for e in range(1, EPOCHS + 1):
             epoch_loss = 0
             epoch_acc = 0
@@ -59,7 +59,7 @@ class BinaryClassification(nn.Module):
 
                 y_pred = self.forward(X_batch)
 
-                loss = criterion(y_pred, y_batch.unsqueeze(1))
+                loss = self.criterion(y_pred, y_batch.unsqueeze(1))
                 acc = self.binary_acc(y_pred, y_batch.unsqueeze(1))
 
                 loss.backward()
@@ -110,7 +110,7 @@ class BinaryClassification(nn.Module):
 
         # y_pred_list = [a.squeeze().tolist() for a in y_pred_list]
         print(confusion_matrix(y_test, y_pred_list))
-        print(classification_report(y_test, y_pred_list))
+        print(classification_report(y_test, y_pred_list, digits=3))
         return y_pred_list
 
 
@@ -122,10 +122,10 @@ def convert_to_train_loader(X, y):
     tensor_y = torch.tensor(y, dtype=torch.float)
 
     my_dataset = TensorDataset(tensor_x, tensor_y)
-    return DataLoader(my_dataset, batch_size=64)
+    return DataLoader(my_dataset, batch_size=128, shuffle=True)
 
 
 def convert_to_test_loader(X):
     tensor_x = torch.tensor(X, dtype=torch.float)
     my_dataset = TensorDataset(tensor_x)
-    return DataLoader(my_dataset, batch_size=64, shuffle=False)
+    return DataLoader(my_dataset, batch_size=128, shuffle=False)

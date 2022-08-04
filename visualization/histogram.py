@@ -8,3 +8,4 @@ def histogram_uni(x, bins=20, title="", file=None):
         plt.savefig(file)
     else:
         plt.show()
+    plt.cla()

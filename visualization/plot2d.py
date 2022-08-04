@@ -80,14 +80,16 @@ def plot2dvectors(vectors, labels):
     plt.show()
 
 
-def plot2dvectors_2label(vectors, labels, labels2):
-    t = vectors.transpose()
+def plot2dvectors_2label(vectors, labels, labels2, title):
+    from sklearn.manifold import TSNE
+    reduced = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(vectors)
+    t = reduced.transpose()
     color_arr = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
                  'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
     plt.subplot(1, 2, 1)
     colors = []
     for l in labels:
-        colors.append(color_arr[int(l)])
+        colors.append(color_arr[int(l) % 10])
     plt.scatter(t[0], t[1], c=colors)
     fre_label = dict()
     for i, txt in enumerate(labels):
@@ -110,4 +112,5 @@ def plot2dvectors_2label(vectors, labels, labels2):
             fre_label[labels[i]] += 1
         if random.uniform(0, 10) > fre_label[labels[i]]:
             plt.annotate(labels[i], (t[0][i], t[1][i]))
-    plt.show()
+    plt.savefig(title)
+    plt.close()

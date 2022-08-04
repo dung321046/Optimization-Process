@@ -33,6 +33,7 @@ if __name__ == "__main__":
     print(partial_X_train.shape)
     data = convert_to_train_loader(partial_X_train, partial_y_train)
     model.fit(data, EPOCHS=20)
+    torch.save(model.state_dict(), "./imdb/model")
 
     X_test = np.load("./" + dataset + "/test.npy", mmap_mode='r')
     y_test = np.load("./" + dataset + "/test_label.npy", mmap_mode='r')
