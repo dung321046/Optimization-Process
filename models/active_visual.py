@@ -9,6 +9,7 @@ def get_test_visual():
     marker = np.load("./" + dataset + "/marker.npy", mmap_mode='r')
     predicts = np.load("./" + dataset + "/predict.npy", mmap_mode='r')
     label = np.load("./" + dataset + "/label.npy", mmap_mode='r')
+    error = np.load("./" + dataset + "/error.npy", mmap_mode='r')
     # acc_test = []
     # for t in error_test:
     #     if t < 0.5:
@@ -23,7 +24,9 @@ def get_test_visual():
             acc_test.append(0)
     acc_test = np.asarray(acc_test)
     # plot2d.plot2d_density_tsne_label(X_test, acc_test)
-    plot2d.plot2d_density_tsne_marker_label(X_feature, marker, acc_test)
+    X_2d = plot2d.plot2d_density_tsne_marker_label(X_feature, marker, acc_test)
+    # plot2d.plot2d_weighted_density(X_2d, predicts)
+    plot2d.plot2d_weighted_density(X_2d, error, acc_test)
 
 
 get_test_visual()

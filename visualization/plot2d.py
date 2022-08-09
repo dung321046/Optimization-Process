@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import numpy as np
 
+import seaborn as sns
+import pandas as pd
+
 
 def plot2d_density(vectors):
     pca = PCA(n_components=2)
@@ -41,13 +44,30 @@ def plot2d_density_tsne(vectors):
     plt.show()
 
 
+def plot2d_weighted_density(vectors, weights, acc):
+    from scipy.interpolate.rbf import Rbf  # radial basis functions
+    rbf_fun = Rbf(vectors[:, 0], vectors[:, 1], weights, function='gaussian')
+    minx, maxx = min(vectors[:, 0]), max(vectors[:, 0])
+    miny, maxy = min(vectors[:, 1]), max(vectors[:, 1])
+    x = np.linspace(minx, maxx, 200)
+    y = np.linspace(miny, maxy, 200)
+    X, Y = np.meshgrid(x, y)
+    fig, ax = plt.subplots(1, 3)
+    z_new = rbf_fun(X.ravel(), Y.ravel()).reshape(X.shape)
+    c = ax[0].pcolor(X, Y, z_new, cmap='bwr')
+    fig.colorbar(c, ax=ax[0])
+    # sns.scatterplot(x=X, y=Y, hue=z_new, ax=ax[0])
+    sns.scatterplot(x=vectors[:, 0], y=vectors[:, 1], hue=weights, ax=ax[1])
+    sns.scatterplot(x=vectors[:, 0], y=vectors[:, 1], hue=acc, ax=ax[2])
+    plt.show()
+
+
 def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
     from sklearn.manifold import TSNE
-    reduced = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(vectors)
+    reduced = TSNE(n_components=2, learning_rate='auto', init='random', random_state=27).fit_transform(vectors)
     # reduced = vectors
     print(reduced)
-    import seaborn as sns
-    import pandas as pd
+
     trainIdx = []
     testIdx = []
     for id, marker in enumerate(markers):
@@ -92,7 +112,9 @@ def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
     # CS = ax[1].contour(np.rot90(Z), cmap=plt.cm.gist_earth_r,
     #                   extent=[-40, 60, -70, 70], aspect="auto")
     fig.colorbar(CS)
+    plt.savefig("test")
     plt.show()
+    plt.close()
     return reduced
 
 
