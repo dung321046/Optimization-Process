@@ -41,6 +41,61 @@ def plot2d_density_tsne(vectors):
     plt.show()
 
 
+def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
+    from sklearn.manifold import TSNE
+    reduced = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(vectors)
+    # reduced = vectors
+    print(reduced)
+    import seaborn as sns
+    import pandas as pd
+    trainIdx = []
+    testIdx = []
+    for id, marker in enumerate(markers):
+        if marker == 1:
+            trainIdx.append(id)
+        else:
+            testIdx.append(id)
+    train = np.concatenate((reduced[trainIdx], accuracy[trainIdx].reshape(-1, 1)), axis=1)
+    trainDf = pd.DataFrame(train, columns=['x', 'y', 'acc'])
+    testDf = pd.DataFrame(reduced[testIdx], columns=['x', 'y'])
+    total = np.concatenate((reduced, markers.reshape(-1, 1)), axis=1)
+    df = pd.DataFrame(total,
+                      columns=['x', 'y', 'isTrain'])
+    total2 = np.concatenate((reduced, accuracy.reshape(-1, 1)), axis=1)
+    df2 = pd.DataFrame(total2,
+                       columns=['x', 'y', 'acc'])
+
+    fig, ax = plt.subplots(1, 3)
+    # sns.kdeplot(data=df, x="x", y="y", ax=ax[0])
+    sns.kdeplot(data=trainDf, x="x", y="y", hue='acc', ax=ax[0])
+    ax[0].set_title("Distribution of correct/incorrect train data")
+    sns.kdeplot(data=df2, x="x", y="y", hue="acc", kind="kde", ax=ax[1])
+    ax[1].set_title("Distribution of correct/incorrect test data")
+    # sns.kdeplot(data=testDf, x="x", y="y", ax=ax[3])
+    import scipy.stats
+    print(reduced[trainIdx])
+    kdea = scipy.stats.gaussian_kde(np.transpose(reduced[trainIdx]))
+    kdeb = scipy.stats.gaussian_kde(np.transpose(reduced[testIdx]))
+    minx, maxx = min(reduced[:, 0]), max(reduced[:, 0])
+    miny, maxy = min(reduced[:, 1]), max(reduced[:, 1])
+    x = np.linspace(minx, maxx, 200)
+    y = np.linspace(miny, maxy, 200)
+    X, Y = np.meshgrid(x, y)
+    positions = np.vstack([X.ravel(), Y.ravel()])
+    print(kdea(positions).shape)
+    print(kdeb(positions).shape)
+    subtract = kdea(positions) - kdeb(positions)
+    Z = np.reshape(subtract.T, X.shape)
+    CS = ax[2].imshow(np.rot90(Z), cmap='RdYlGn',
+                      extent=[minx, maxx, miny, maxy], aspect="auto")
+    ax[2].set_title("Differences between train and test")
+    # CS = ax[1].contour(np.rot90(Z), cmap=plt.cm.gist_earth_r,
+    #                   extent=[-40, 60, -70, 70], aspect="auto")
+    fig.colorbar(CS)
+    plt.show()
+    return reduced
+
+
 def plot2d_density_tsne_label(vectors, labels):
     from sklearn.manifold import TSNE
     reduced = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(vectors)

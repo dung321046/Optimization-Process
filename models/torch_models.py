@@ -23,7 +23,7 @@ def buildNetwork(layers, activation="relu", dropout=0.2):
 class BinaryClassification(nn.Module):
     def __init__(self, input_size, device):
         super(BinaryClassification, self).__init__()
-        self.main_net = buildNetwork([input_size, 64, 16, 1], dropout=0.1)
+        self.main_net = buildNetwork([input_size, 16, 64, 1], dropout=0.1)
         self.criterion = nn.BCEWithLogitsLoss()
         self.device = device
 

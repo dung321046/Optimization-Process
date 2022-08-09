@@ -23,8 +23,8 @@ def get_test_visual():
     acc_test = np.asarray(acc_test)
 
     # plot2d.plot2d_density_tsne_label(X_test, acc_test)
-    plot2d.plot2d_density_tsne_label(X_feature, acc_test)
-
+    X_2d = plot2d.plot2d_density_tsne_label(X_feature, acc_test)
+    plot2d.plot2d_density_tsne_label(X_2d, acc_test)
 
 X_feature = np.load("./" + dataset + "/feature.npy", mmap_mode='r')
 
@@ -43,7 +43,8 @@ label = label[idx]
 acc = [1 if predicts[i] == label[i] else 0 for i in range(len(label))]
 marker = np.load("./" + dataset + "/marker.npy", mmap_mode='r')
 marker = marker[idx]
-from stat_measure.utils import coefficent_of_label_n_acc
-
-print(coefficent_of_label_n_acc(X_feature, error_test, marker, "Euclidean"))
-print(coefficent_of_label_n_acc(X_feature, acc, marker, "Euclidean"))
+get_test_visual()
+# from stat_measure.utils import coefficent_of_label_n_acc
+#
+# print(coefficent_of_label_n_acc(X_feature, error_test, marker, "Euclidean"))
+# print(coefficent_of_label_n_acc(X_feature, acc, marker, "Euclidean"))
