@@ -106,10 +106,12 @@ class BinaryClassification(nn.Module):
                 X_batch = X_batch_[0].to(self.device)
                 values = self.get_last_layer(X_batch)
                 feature_list.extend(values.cpu().numpy())
-                y_pred_prob = self.forward_feature_to_predicts(values)
-                entropy_batch = y_pred_prob * torch.log(y_pred_prob) + (1 - y_pred_prob) * torch.log(1 - y_pred_prob)
+                y_pred_prob = self.forward_feature_to_predicts(values).squeeze()
+                entropy_batch = - y_pred_prob * torch.log2(y_pred_prob) - (1 - y_pred_prob) * torch.log2(
+                    1 - y_pred_prob)
+                entropy_batch = torch.nan_to_num(entropy_batch, 0)
                 entropies.extend(entropy_batch.cpu().numpy())
-                probs.extend(torch.max(y_pred_prob, 1 - y_pred_prob).cpu().numpy())
+                probs.extend(torch.max(y_pred_prob, 1 - y_pred_prob).squeeze().cpu().numpy())
                 predicts.extend(torch.round(y_pred_prob).cpu().numpy())
         return feature_list, probs, entropies, predicts
 

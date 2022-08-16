@@ -44,8 +44,11 @@ def plot2d_density_tsne(vectors):
     plt.show()
 
 
-def plot2d_weighted_density(vectors, weights, acc):
+def plot2d_weighted_density(vectors, weights, acc, filename):
     from scipy.interpolate.rbf import Rbf  # radial basis functions
+    for id, weight in enumerate(weights):
+        if weight == np.nan:
+            weights[id] = 0
     rbf_fun = Rbf(vectors[:, 0], vectors[:, 1], weights, function='gaussian')
     minx, maxx = min(vectors[:, 0]), max(vectors[:, 0])
     miny, maxy = min(vectors[:, 1]), max(vectors[:, 1])
@@ -59,10 +62,12 @@ def plot2d_weighted_density(vectors, weights, acc):
     # sns.scatterplot(x=X, y=Y, hue=z_new, ax=ax[0])
     sns.scatterplot(x=vectors[:, 0], y=vectors[:, 1], hue=weights, ax=ax[1])
     sns.scatterplot(x=vectors[:, 0], y=vectors[:, 1], hue=acc, ax=ax[2])
-    plt.show()
+    fig.set_size_inches(18.5, 10.5)
+    plt.savefig(filename)
+    plt.close()
 
 
-def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
+def plot2d_density_tsne_marker_label(vectors, markers, accuracy, filename):
     from sklearn.manifold import TSNE
     reduced = TSNE(n_components=2, learning_rate='auto', init='random', random_state=27).fit_transform(vectors)
     # reduced = vectors
@@ -87,7 +92,10 @@ def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
 
     fig, ax = plt.subplots(1, 3)
     # sns.kdeplot(data=df, x="x", y="y", ax=ax[0])
-    sns.kdeplot(data=trainDf, x="x", y="y", hue='acc', ax=ax[0])
+    try:
+        sns.kdeplot(data=trainDf, x="x", y="y", hue='acc', ax=ax[0])
+    except:
+        sns.scatterplot(x=trainDf["x"], y=trainDf["y"], hue=accuracy[trainIdx], ax=ax[0])
     ax[0].set_title("Distribution of correct/incorrect train data")
     sns.kdeplot(data=df2, x="x", y="y", hue="acc", kind="kde", ax=ax[1])
     ax[1].set_title("Distribution of correct/incorrect test data")
@@ -112,8 +120,8 @@ def plot2d_density_tsne_marker_label(vectors, markers, accuracy):
     # CS = ax[1].contour(np.rot90(Z), cmap=plt.cm.gist_earth_r,
     #                   extent=[-40, 60, -70, 70], aspect="auto")
     fig.colorbar(CS)
-    plt.savefig("test")
-    plt.show()
+    fig.set_size_inches(18.5, 10.5)
+    plt.savefig(filename)
     plt.close()
     return reduced
 
